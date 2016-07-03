@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='pensieve_repo_agent',
     version='0.1.0',
-    packages=find_packages(),
+    py_modules=['pensieve_repo_agent'],
     install_requires=[],
     entry_points={
         'console_scripts': [
