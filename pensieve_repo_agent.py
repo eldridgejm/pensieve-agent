@@ -101,7 +101,7 @@ COMMANDS = {
     }
 
 
-def main(cwd=None, receive=None, send=None, dispatch=None, commands=None):
+def main(cwd=None, receive=None, send=None, dispatch=None, commands=COMMANDS):
     """Read and process the request and present the result."""
 
     if cwd is None:
@@ -115,9 +115,6 @@ def main(cwd=None, receive=None, send=None, dispatch=None, commands=None):
 
     if dispatch is None:
         dispatch = dispatch_request
-
-    if commands is None:
-        commands = COMMANDS
 
     try:
         request = receive()
