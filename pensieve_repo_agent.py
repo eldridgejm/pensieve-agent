@@ -77,7 +77,7 @@ def cmd_list(pensieve_path):
         if entry.is_dir():
             names.append(entry.name)
 
-    return names
+    return []
 
 
 def cmd_new(pensieve_path, name):
