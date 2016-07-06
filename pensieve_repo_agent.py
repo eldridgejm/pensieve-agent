@@ -4,20 +4,41 @@ import json
 import sys
 
 
-def cmd_ls():
-    names = []
-    for path in pathlib.Path.cwd().iterdir():
-        names.append(path.name)
+class PensieveAgentError(Exception):
+    """General pensieve_repo_agent error."""
+    code = 1
 
-    response = {
-        'error': {
-            'code': 0,
-            'msg': 'All good!'
-            },
-        'data': sorted(names)
-        }
 
-    print(json.dumps(response))
+class InvalidCommandError(PensieveAgentError):
+    code = 2
+
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return '"{}" is not a valid command.'.format(self.name)
+
+
+class InvalidDataError(PensieveAgentError):
+    code = 3
+    
+    def __init__(self, command, data):
+        self.command = command
+        self.data = data
+
+    def __str__(self):
+        s = 'Invalid data "{}" for command "{}".'
+        return s.format(self.data, self.command)
+
+
+class MalformedMessageError(PensieveAgentError):
+    code = 4
+
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return 'The message "{}" is malformed.'.format(self.message)
 
 
 class Commands(object):
@@ -33,12 +54,43 @@ class Commands(object):
         return sorted(names)
 
 
+def _invoke(commands, name, data):
+    try:
+        command = getattr(commands, name)
+    except AttributeError:
+        raise InvalidCommandError(name)
+
+    try:
+        return command(**data)
+    except TypeError:
+        raise InvalidDataError(name, data)
+
+
+
+def _unpack(message):
+    try:
+        return message['command'], message['data']
+    except (TypeError, KeyError):
+        raise MalformedMessageError(message)
+
+
 def route(receive, send, commands):
     """Route messages to the proper command and send the response."""
-    message = receive()
-    command = getattr(commands, message['command'])
-    response = command(**message['data'])
-    send(response)
+
+    try:
+        message = receive()
+        command_name, data = _unpack(message)
+        result = _invoke(commands, message['command'], message['data'])
+    except PensieveAgentError as exc:
+        error = {'code': exc.code, 'msg': str(exc)}
+        result = None
+    else:
+        error = {'code': 0, 'msg': 'All good!'}
+
+    send({
+        'error': error,
+        'data': result
+    })
 
 
 def main():
