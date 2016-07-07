@@ -192,3 +192,12 @@ def test_list_command_sorts_alphabetically(pensieve, names):
     commands = pensieve_repo_agent.Commands(pensieve)
     result = commands.list()
     assert result == sorted(names)
+
+
+# test new command ############################################################
+
+
+def test_new_command_creates_repository(pensieve):
+    commands = pensieve_repo_agent.Commands(pensieve)
+    commands.new('steve')
+    assert (pensieve / 'steve' / 'repo.git').is_dir()
