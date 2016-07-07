@@ -9,9 +9,9 @@ def step_impl(context, repos):
     context.repo_names = [name.strip() for name in repos.split(',')]
     context.tempdir = tempfile.TemporaryDirectory()
 
-    root = pathlib.Path(context.tempdir.name)
+    context.path = pathlib.Path(context.tempdir.name)
     for name in context.repo_names:
-        (root / name).mkdir()
+        (context.path / name.strip('"')).mkdir()
 
 
 @when('the agent receives')
@@ -26,3 +26,8 @@ def step_impl(context):
     result = json.loads(context.proc.stdout.decode())
     expected = json.loads(context.text)
     assert result == expected, (str(result), str(expected))
+
+
+@then('the pensieve has repo {name}')
+def step_impl(context, name):
+    assert (context.path / name).is_dir()
