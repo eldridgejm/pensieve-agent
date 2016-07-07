@@ -1,6 +1,7 @@
 import functools
-import pathlib
 import json
+import pathlib
+import subprocess
 import sys
 
 
@@ -41,6 +42,11 @@ class MalformedMessageError(PensieveAgentError):
         return 'The message "{}" is malformed.'.format(self.message)
 
 
+def _initialize_git_repository(path):
+    cmd = ['git', 'init', '--bare', 'repo.git']
+    subprocess.run(cmd, cwd=str(path), stdout=subprocess.PIPE)
+
+
 class Commands(object):
 
     def __init__(self, path):
@@ -52,6 +58,11 @@ class Commands(object):
         for subdir in self.path.iterdir():
             names.append(subdir.name)
         return sorted(names)
+
+    def new(self, name):
+        repo_path = self.path / name
+        repo_path.mkdir()
+        _initialize_git_repository(repo_path)
 
 
 def _invoke(commands, name, data):

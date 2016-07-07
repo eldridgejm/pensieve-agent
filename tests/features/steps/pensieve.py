@@ -28,6 +28,6 @@ def step_impl(context):
     assert result == expected, (str(result), str(expected))
 
 
-@then('the pensieve has repo {name}')
+@then('the pensieve has repo "{name}".')
 def step_impl(context, name):
     assert (context.path / name).is_dir()
