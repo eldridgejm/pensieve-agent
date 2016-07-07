@@ -201,3 +201,18 @@ def test_new_command_creates_repository(pensieve):
     commands = pensieve_repo_agent.Commands(pensieve)
     commands.new('steve')
     assert (pensieve / 'steve' / 'repo.git').is_dir()
+
+
+def test_new_command_raises_when_duplicate_name_is_given(pensieve, names):
+    if not names:
+        return
+
+    commands = pensieve_repo_agent.Commands(pensieve)
+    with pytest.raises(pensieve_repo_agent.DuplicateNameError):
+        commands.new(names[0])
+
+
+def test_new_command_raises_when_invalid_character_in_name(pensieve):
+    commands = pensieve_repo_agent.Commands(pensieve)
+    with pytest.raises(pensieve_repo_agent.InvalidNameError):
+        commands.new("/test")

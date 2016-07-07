@@ -42,6 +42,30 @@ class MalformedMessageError(PensieveAgentError):
         return 'The message "{}" is malformed.'.format(self.message)
 
 
+class DuplicateNameError(PensieveAgentError):
+    code = 5
+
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        s = 'The pensieve already contains a repository with name "{}".'
+        return s.format(self.name)
+
+
+class InvalidNameError(PensieveAgentError):
+    code = 6
+
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return (
+            'The name "{}" could not be created. It may contain invalid '
+            'characters.'
+            ).format(self.name)
+
+
 def _initialize_git_repository(path):
     cmd = ['git', 'init', '--bare', 'repo.git']
     subprocess.run(cmd, cwd=str(path), stdout=subprocess.PIPE)
@@ -61,7 +85,13 @@ class Commands(object):
 
     def new(self, name):
         repo_path = self.path / name
-        repo_path.mkdir()
+        try:
+            repo_path.mkdir()
+        except FileExistsError:
+            raise DuplicateNameError(name)
+        except PermissionError:
+            raise InvalidNameError(name)
+
         _initialize_git_repository(repo_path)
 
 
