@@ -183,3 +183,12 @@ def test_route_sends_error_when_message_has_no_data():
             },
         'data': None
     })
+
+
+# test list command ###########################################################
+
+
+def test_list_command_sorts_alphabetically(pensieve, names):
+    commands = pensieve_repo_agent.Commands(pensieve)
+    result = commands.list()
+    assert result == sorted(names)
