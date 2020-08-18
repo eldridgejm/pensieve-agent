@@ -1,8 +1,12 @@
+"""An interface to a standardized collection of git repositories."""
 import functools
 import json
 import pathlib
 import subprocess
 import sys
+
+
+TOPICS_FILE_NAME = 'topics'
 
 
 class PensieveAgentError(Exception):
@@ -77,7 +81,7 @@ class Commands(object):
         self.path = path
 
     def list(self):
-        """List the folder names under the path."""
+        """List the repo names under the path."""
         names = []
         for subdir in self.path.iterdir():
             names.append(subdir.name)
@@ -93,6 +97,15 @@ class Commands(object):
             raise InvalidNameError(name)
 
         _initialize_git_repository(repo_path)
+
+    def topics(self):
+        """Return dict mapping repo names to sets of topics."""
+        topics = {}
+        for subdir in self.path.iterdir():
+            with (subdir / TOPICS_FILE_NAME).open() as fileobj:
+                topics[subdir.name] = sorted(l.strip() for l in fileobj.readlines())
+
+        return topics
 
 
 def _invoke(commands, name, data):

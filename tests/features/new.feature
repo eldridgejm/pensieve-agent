@@ -1,7 +1,14 @@
 Feature: Creating a new repository
 
     Scenario: A repo with a unique name is created in a non-empty pensieve.
-        Given the pensieve has repos "foo", "bar", "baz".
+        Given the pensieve has repos "foo", "bar", "baz" with topics
+            """
+            {
+                "foo": [],
+                "bar": [],
+                "baz": []
+            }
+            """
         When the agent receives
             """
             {"command": "new", "data": {"name": "testing"}}
@@ -16,7 +23,14 @@ Feature: Creating a new repository
             """
 
     Scenario: A repo is created with a duplicate name.
-        Given the pensieve has repos "foo", "bar", "baz".
+        Given the pensieve has repos "foo", "bar", "baz" with topics
+            """
+            {
+                "foo": [],
+                "bar": [],
+                "baz": []
+            }
+            """
         When the agent receives
             """
             {"command": "new", "data": {"name": "foo"}}
@@ -33,7 +47,14 @@ Feature: Creating a new repository
             """
 
     Scenario: A repo is created with an invalid filesystem name.
-        Given the pensieve has repos "foo", "bar", "baz".
+        Given the pensieve has repos "foo", "bar", "baz" with topics
+            """
+            {
+                "foo": [],
+                "bar": [],
+                "baz": []
+            }
+            """
         When the agent receives
             """
             {"command": "new", "data": {"name": "/test"}}

@@ -1,7 +1,14 @@
 Feature: Listing the repositories
 
     Scenario: A non-empty pensieve.
-        Given the pensieve has repos "foo", "bar", "baz".
+        Given the pensieve has repos "foo", "bar", "baz" with topics
+            """
+            {
+                "foo": [],
+                "bar": [],
+                "baz": []
+            }
+            """
         When the agent receives
             """
             {"command": "list", "data": {}}

@@ -4,13 +4,19 @@ from unittest.mock import Mock
 import pytest
 from pytest import fixture
 
-import pensieve_repo_agent
+import pensieve_agent
 
 
 _NAMES = [
     ['foo', 'bar', 'baz'],
     []
 ]
+
+_TOPICS = {
+    "foo": {"a", "b"},
+    "bar": {"b", "c"},
+    "baz": {"d"}
+}
 
 
 @fixture(params=_NAMES)
@@ -23,6 +29,9 @@ def pensieve(tmpdir, names):
     path = pathlib.Path(str(tmpdir))
     for name in names:
         (path / name).mkdir()
+        with (path / name / 'topics').open('w') as fileobj:
+            for tag in _TOPICS[name]:
+                fileobj.write(tag + '\n')
     return path
 
 
@@ -41,7 +50,7 @@ def test_route_invokes_command_with_data():
     send = Mock()
     commands = Mock()
 
-    pensieve_repo_agent.route(receive, send, commands)
+    pensieve_agent.route(receive, send, commands)
     commands.foo.assert_called_once_with(**MESSAGE['data'])
 
 
@@ -51,7 +60,7 @@ def test_route_sends_message_with_error_data():
     commands = Mock()
     commands.foo.return_value = 'hello'
 
-    pensieve_repo_agent.route(receive, send, commands)
+    pensieve_agent.route(receive, send, commands)
     send.assert_called_once_with({
         'error': {
             'code': 0,
@@ -65,9 +74,9 @@ def test_route_sends_correct_error_when_command_raises():
     receive = Mock(return_value=MESSAGE)
     send = Mock()
     commands = Mock()
-    commands.foo.side_effect = pensieve_repo_agent.PensieveAgentError('test')
+    commands.foo.side_effect = pensieve_agent.PensieveAgentError('test')
 
-    pensieve_repo_agent.route(receive, send, commands)
+    pensieve_agent.route(receive, send, commands)
     send.assert_called_once_with({
         'error': {
             'code': 1,
@@ -82,8 +91,8 @@ def test_route_sends_error_when_invalid_command_given():
     send = Mock()
     commands = object()
 
-    pensieve_repo_agent.route(receive, send, commands)
-    exc = pensieve_repo_agent.InvalidCommandError('foo')
+    pensieve_agent.route(receive, send, commands)
+    exc = pensieve_agent.InvalidCommandError('foo')
     send.assert_called_once_with({
         'error': {
             'code': exc.code,
@@ -104,8 +113,8 @@ def test_route_sends_error_when_invalid_data_given():
 
     commands = Commands()
 
-    pensieve_repo_agent.route(receive, send, commands)
-    exc = pensieve_repo_agent.InvalidDataError('foo', MESSAGE['data'])
+    pensieve_agent.route(receive, send, commands)
+    exc = pensieve_agent.InvalidDataError('foo', MESSAGE['data'])
     send.assert_called_once_with({
         'error': {
             'code': exc.code,
@@ -116,12 +125,12 @@ def test_route_sends_error_when_invalid_data_given():
 
 
 def test_route_sends_error_when_receive_raises():
-    exc = pensieve_repo_agent.PensieveAgentError('test')
+    exc = pensieve_agent.PensieveAgentError('test')
     receive = Mock(side_effect=exc)
     send = Mock()
     commands = Mock()
 
-    pensieve_repo_agent.route(receive, send, commands)
+    pensieve_agent.route(receive, send, commands)
     send.assert_called_once_with({
         'error': {
             'code': exc.code,
@@ -136,8 +145,8 @@ def test_route_sends_error_when_message_is_malformed():
     send = Mock()
     commands = Mock()
 
-    pensieve_repo_agent.route(receive, send, commands)
-    exc = pensieve_repo_agent.MalformedMessageError(42)
+    pensieve_agent.route(receive, send, commands)
+    exc = pensieve_agent.MalformedMessageError(42)
     send.assert_called_once_with({
         'error': {
             'code': exc.code,
@@ -155,8 +164,8 @@ def test_route_sends_error_when_message_has_no_command():
     send = Mock()
     commands = Mock()
 
-    pensieve_repo_agent.route(receive, send, commands)
-    exc = pensieve_repo_agent.MalformedMessageError(msg)
+    pensieve_agent.route(receive, send, commands)
+    exc = pensieve_agent.MalformedMessageError(msg)
     send.assert_called_once_with({
         'error': {
             'code': exc.code,
@@ -174,8 +183,8 @@ def test_route_sends_error_when_message_has_no_data():
     send = Mock()
     commands = Mock()
 
-    pensieve_repo_agent.route(receive, send, commands)
-    exc = pensieve_repo_agent.MalformedMessageError(msg)
+    pensieve_agent.route(receive, send, commands)
+    exc = pensieve_agent.MalformedMessageError(msg)
     send.assert_called_once_with({
         'error': {
             'code': exc.code,
@@ -189,7 +198,7 @@ def test_route_sends_error_when_message_has_no_data():
 
 
 def test_list_command_sorts_alphabetically(pensieve, names):
-    commands = pensieve_repo_agent.Commands(pensieve)
+    commands = pensieve_agent.Commands(pensieve)
     result = commands.list()
     assert result == sorted(names)
 
@@ -198,7 +207,7 @@ def test_list_command_sorts_alphabetically(pensieve, names):
 
 
 def test_new_command_creates_repository(pensieve):
-    commands = pensieve_repo_agent.Commands(pensieve)
+    commands = pensieve_agent.Commands(pensieve)
     commands.new('steve')
     assert (pensieve / 'steve' / 'repo.git').is_dir()
 
@@ -207,12 +216,22 @@ def test_new_command_raises_when_duplicate_name_is_given(pensieve, names):
     if not names:
         return
 
-    commands = pensieve_repo_agent.Commands(pensieve)
-    with pytest.raises(pensieve_repo_agent.DuplicateNameError):
+    commands = pensieve_agent.Commands(pensieve)
+    with pytest.raises(pensieve_agent.DuplicateNameError):
         commands.new(names[0])
 
 
 def test_new_command_raises_when_invalid_character_in_name(pensieve):
-    commands = pensieve_repo_agent.Commands(pensieve)
-    with pytest.raises(pensieve_repo_agent.InvalidNameError):
+    commands = pensieve_agent.Commands(pensieve)
+    with pytest.raises(pensieve_agent.InvalidNameError):
         commands.new("/test")
+
+
+# test topics command #########################################################
+
+
+def test_topics_command_returns_dictionary_of_topics(pensieve, names):
+    commands = pensieve_agent.Commands(pensieve)
+    result = commands.topics()
+    expected = {name:sorted(_TOPICS[name]) for name in names}
+    assert result == expected

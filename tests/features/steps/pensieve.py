@@ -4,20 +4,25 @@ import subprocess
 import tempfile
 
 
-@given('the pensieve has repos {repos}.')
+@given('the pensieve has repos {repos} with topics')
 def step_impl(context, repos):
     context.repo_names = [name.strip() for name in repos.split(',')]
     context.tempdir = tempfile.TemporaryDirectory()
+    context.all_topics = json.loads(context.text)
 
     context.path = pathlib.Path(context.tempdir.name)
     for name in context.repo_names:
-        (context.path / name.strip('"')).mkdir()
+        path = context.path / name.strip('"')
+        path.mkdir()
+        with (path / 'topics').open('w') as fileobj:
+            for tag in context.all_topics[name.strip('"')]:
+                fileobj.write(tag.strip('"') + '\n')
 
 
 @when('the agent receives')
 def step_impl(context):
     context.proc = subprocess.run(
-        ['pensieve-repo-agent'], input=context.text.encode(), 
+        ['_pensieve-agent'], input=context.text.encode(), 
         cwd=context.tempdir.name, stdout=subprocess.PIPE)
 
 
