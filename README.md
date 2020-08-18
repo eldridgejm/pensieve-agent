@@ -48,10 +48,13 @@ Usage
 -----
 
 This script is not meant to be invoked by the user directly -- instead, it is
-meant to be invoked by the `pensieve` CLI over SSH. The script reads its
-instructions via stdin. The input should be formatted as JSON with two fields:
-the "name" of the command, and the "data" needed to execute the command. See the
-source for the available commands and the data they require.
+meant to be invoked by the `pensieve` CLI over SSH. 
+
+Start the script in the directory containing the repositories.
+The script reads its instructions via stdin. The input should be formatted as
+JSON with two fields: the "name" of the command, and the "data" needed to
+execute the command. See the source for the available commands and the data they
+require.
 
 For instance, to create a new repository named "foo", pass the following JSON:
 ```
