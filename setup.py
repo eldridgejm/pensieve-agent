@@ -1,14 +1,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='pensieve_agent',
-    version='1.0.0',
-    py_modules=['pensieve_agent'],
+    name="pensieve_agent",
+    version="1.0.0",
+    py_modules=["pensieve_agent"],
     install_requires=[],
-    entry_points={
-        'console_scripts': [
-            '_pensieve-agent = pensieve_agent:main'
-        ]
-    }
+    entry_points={"console_scripts": ["_pensieve-agent = pensieve_agent:main"]},
 )
-

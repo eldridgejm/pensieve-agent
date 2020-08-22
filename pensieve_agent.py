@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 
-TOPICS_FILE_NAME = 'topics'
+META_FILE_NAME = 'meta.json'
 
 
 class PensieveAgentError(Exception):
@@ -81,13 +81,14 @@ class Commands(object):
         self.path = path
 
     def list(self):
-        """List the repo names under the path."""
-        names = []
+        """Return metadata about the repositories."""
+        meta = {}
         for subdir in self.path.iterdir():
-            names.append(subdir.name)
-        return sorted(names)
+            with (subdir / META_FILE_NAME).open() as fileobj:
+                meta[subdir.name] = json.load(fileobj)
+        return meta
 
-    def new(self, name):
+    def new(self, name, description=None, tags=None):
         repo_path = self.path / name
         try:
             repo_path.mkdir()
@@ -96,16 +97,15 @@ class Commands(object):
         except PermissionError:
             raise InvalidNameError(name)
 
+        meta = {
+            'description': description,
+            'tags': [] if tags is None else tags
+        }
+
+        with (repo_path / META_FILE_NAME).open('w') as fileobj:
+            json.dump(meta, fileobj)
+
         _initialize_git_repository(repo_path)
-
-    def topics(self):
-        """Return dict mapping repo names to sets of topics."""
-        topics = {}
-        for subdir in self.path.iterdir():
-            with (subdir / TOPICS_FILE_NAME).open() as fileobj:
-                topics[subdir.name] = sorted(l.strip() for l in fileobj.readlines())
-
-        return topics
 
 
 def _invoke(commands, name, data):
@@ -120,7 +120,6 @@ def _invoke(commands, name, data):
         raise InvalidDataError(name, data)
 
 
-
 def _unpack(message):
     try:
         return message['command'], message['data']
@@ -133,8 +132,8 @@ def route(receive, send, commands):
 
     try:
         message = receive()
-        command_name, data = _unpack(message)
-        result = _invoke(commands, message['command'], message['data'])
+        command, data = _unpack(message)
+        result = _invoke(commands, command, data)
     except PensieveAgentError as exc:
         error = {'code': exc.code, 'msg': str(exc)}
         result = None

@@ -1,2 +1,5 @@
 .cache/
 pensieve_repo_agent.egg-info/
+venv
+*.egg-info
+__pycache__

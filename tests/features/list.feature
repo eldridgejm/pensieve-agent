@@ -1,12 +1,12 @@
 Feature: Listing the repositories
 
     Scenario: A non-empty pensieve.
-        Given the pensieve has repos "foo", "bar", "baz" with topics
+        Given the store has repos "foo", "bar", "baz" with metadata
             """
             {
-                "foo": [],
-                "bar": [],
-                "baz": []
+            "foo": {"tags": ["research"], "description": "This is foo."},
+            "bar": {"tags": ["teaching", "research"], "description": "This is bar."},
+            "baz": {"tags": [], "description": null}
             }
             """
         When the agent receives
@@ -17,6 +17,11 @@ Feature: Listing the repositories
             """
             {
                 "error": {"code": 0, "msg": "All good!"},
-                "data": ["bar", "baz", "foo"]
+                "data":
+                    {
+                    "foo": {"tags": ["research"], "description": "This is foo."},
+                    "bar": {"tags": ["teaching", "research"], "description": "This is bar."},
+                    "baz": {"tags": [], "description": null}
+                    }
             }
             """
