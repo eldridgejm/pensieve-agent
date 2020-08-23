@@ -4,9 +4,9 @@ Feature: Listing the repositories
         Given the store has repos "foo", "bar", "baz" with metadata
             """
             {
-            "foo": {"tags": ["research"], "description": "This is foo."},
-            "bar": {"tags": ["teaching", "research"], "description": "This is bar."},
-            "baz": {"tags": [], "description": null}
+            "foo": {"topics": ["research"], "description": "This is foo."},
+            "bar": {"topics": ["teaching", "research"], "description": "This is bar."},
+            "baz": {"topics": [], "description": null}
             }
             """
         When the agent receives
@@ -19,9 +19,9 @@ Feature: Listing the repositories
                 "error": {"code": 0, "msg": "All good!"},
                 "data":
                     {
-                    "foo": {"tags": ["research"], "description": "This is foo."},
-                    "bar": {"tags": ["teaching", "research"], "description": "This is bar."},
-                    "baz": {"tags": [], "description": null}
+                    "foo": {"topics": ["research"], "description": "This is foo."},
+                    "bar": {"topics": ["teaching", "research"], "description": "This is bar."},
+                    "baz": {"topics": [], "description": null}
                     }
             }
             """

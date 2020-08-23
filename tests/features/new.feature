@@ -4,9 +4,9 @@ Feature: Creating a new repository
         Given the store has repos "foo", "bar", "baz" with metadata
             """
             {
-            "foo": {"tags": ["research"], "description": "This is foo."},
-            "bar": {"tags": ["teaching", "research"], "description": "This is bar."},
-            "baz": {"tags": [], "description": 2}
+            "foo": {"topics": ["research"], "description": "This is foo."},
+            "bar": {"topics": ["teaching", "research"], "description": "This is bar."},
+            "baz": {"topics": [], "description": 2}
             }
             """
         When the agent receives
@@ -17,7 +17,7 @@ Feature: Creating a new repository
             """
             {
                 "description": null,
-                "tags": []
+                "topics": []
             }
             """
         And the agent responds with JSON equal to
@@ -32,9 +32,9 @@ Feature: Creating a new repository
         Given the store has repos "foo", "bar", "baz" with metadata
             """
             {
-            "foo": {"tags": ["research"], "description": "This is foo."},
-            "bar": {"tags": ["teaching", "research"], "description": "This is bar."},
-            "baz": {"tags": [], "description": 2}
+            "foo": {"topics": ["research"], "description": "This is foo."},
+            "bar": {"topics": ["teaching", "research"], "description": "This is bar."},
+            "baz": {"topics": [], "description": 2}
             }
             """
         When the agent receives
@@ -56,9 +56,9 @@ Feature: Creating a new repository
         Given the store has repos "foo", "bar", "baz" with metadata
             """
             {
-            "foo": {"tags": ["research"], "description": "This is foo."},
-            "bar": {"tags": ["teaching", "research"], "description": "This is bar."},
-            "baz": {"tags": [], "description": 2}
+            "foo": {"topics": ["research"], "description": "This is foo."},
+            "bar": {"topics": ["teaching", "research"], "description": "This is bar."},
+            "baz": {"topics": [], "description": 2}
             }
             """
         When the agent receives
@@ -80,9 +80,9 @@ Feature: Creating a new repository
         Given the store has repos "foo", "bar", "baz" with metadata
             """
             {
-            "foo": {"tags": ["research"], "description": "This is foo."},
-            "bar": {"tags": ["teaching", "research"], "description": "This is bar."},
-            "baz": {"tags": [], "description": 2}
+            "foo": {"topics": ["research"], "description": "This is foo."},
+            "bar": {"topics": ["teaching", "research"], "description": "This is bar."},
+            "baz": {"topics": [], "description": 2}
             }
             """
         When the agent receives
@@ -93,27 +93,27 @@ Feature: Creating a new repository
             """
             {
                 "description": "This is a test",
-                "tags": []
+                "topics": []
             }
             """
 
-    Scenario: A repo is created with tags.
+    Scenario: A repo is created with topics.
         Given the store has repos "foo", "bar", "baz" with metadata
             """
             {
-            "foo": {"tags": ["research"], "description": "This is foo."},
-            "bar": {"tags": ["teaching", "research"], "description": "This is bar."},
-            "baz": {"tags": [], "description": 2}
+            "foo": {"topics": ["research"], "description": "This is foo."},
+            "bar": {"topics": ["teaching", "research"], "description": "This is bar."},
+            "baz": {"topics": [], "description": 2}
             }
             """
         When the agent receives
             """
-            {"command": "new", "data": {"name": "test", "tags": ["one", "two", "three"]}}
+            {"command": "new", "data": {"name": "test", "topics": ["one", "two", "three"]}}
             """
         Then the pensieve has repo "test" with metadata
             """
             {
                 "description": null,
-                "tags": ["one", "two", "three"]
+                "topics": ["one", "two", "three"]
             }
             """

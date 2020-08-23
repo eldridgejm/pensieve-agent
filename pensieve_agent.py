@@ -88,7 +88,7 @@ class Commands(object):
                 meta[subdir.name] = json.load(fileobj)
         return meta
 
-    def new(self, name, description=None, tags=None):
+    def new(self, name, description=None, topics=None):
         repo_path = self.path / name
         try:
             repo_path.mkdir()
@@ -99,7 +99,7 @@ class Commands(object):
 
         meta = {
             'description': description,
-            'tags': [] if tags is None else tags
+            'topics': [] if topics is None else topics
         }
 
         with (repo_path / META_FILE_NAME).open('w') as fileobj:
